@@ -6,33 +6,12 @@
   <title>Неоновое сердце</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
   <style>
-    body { 
-        margin: 0; 
-        background: #000; 
-        overflow: hidden; 
-        height: 100vh; 
-        width: 100vw;
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
+    body { margin: 0; background: #000; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; }
     #btn {
-        padding: 20px 40px; 
-        font-size: 24px; 
-        background: transparent; 
-        color: #ff00ff;
-        border: 3px solid #ff00ff; 
-        cursor: pointer; 
-        border-radius: 15px;
-        box-shadow: 0 0 20px #ff00ff; 
-        transition: 0.3s;
-        font-family: sans-serif; 
-        font-weight: bold;
-      position: relative !important;
-      margin: auto !important;
+        padding: 20px 40px; font-size: 24px; background: transparent; color: #ff00ff;
+        border: 3px solid #ff00ff; cursor: pointer; border-radius: 15px;
+        box-shadow: 0 0 20px #ff00ff; transition: 0.3s; font-family: sans-serif; font-weight: bold;
+        z-index: 100;
     }
     #btn:hover { background: #ff00ff; color: #000; box-shadow: 0 0 40px #ff00ff; }
   </style>
@@ -46,14 +25,22 @@
   let started = false;
 
   function setup() {
-    createCanvas(windowWidth, windowHeight);
-    document.getElementById('btn').addEventListener('click', () => { started = true; document.getElementById('btn').style.display = 'none'; });
+    let canvas = createCanvas(windowWidth, windowHeight);
+    canvas.position(0, 0);
+    canvas.style('z-index', '-1');
+    document.getElementById('btn').addEventListener('click', () => { 
+        started = true; 
+        document.getElementById('btn').style.display = 'none'; 
+    });
   }
 
   function draw() {
-    background(0, 50);
+    background(0, 30);
     if (started) {
-      if (frameCount % 5 === 0) particles.push(new Particle());
+      // Генерируем частицы по форме сердца
+      for (let i = 0; i < 5; i++) {
+        particles.push(new Particle());
+      }
       for (let i = particles.length - 1; i >= 0; i--) {
         particles[i].update();
         particles[i].show();
@@ -64,15 +51,21 @@
 
   class Particle {
     constructor() {
-      this.pos = createVector(width / 2, height / 2);
-      this.vel = p5.Vector.random2D().mult(random(2, 5));
+      // Математическая формула сердца
+      let t = random(0, TWO_PI);
+      let r = 15;
+      let x = r * (16 * pow(sin(t), 3));
+      let y = -r * (13 * cos(t) - 5 * cos(2 * t) - 2 * cos(3 * t) - cos(4 * t));
+      
+      this.pos = createVector(width/2 + x, height/2 + y);
+      this.vel = createVector(0, 0);
       this.alpha = 255;
     }
-    update() { this.pos.add(this.vel); this.alpha -= 5; }
+    update() { this.alpha -= 3; }
     show() {
       noStroke();
-      fill(255, 0, 255, this.alpha);
-      ellipse(this.pos.x, this.pos.y, 8);
+      fill(255, 50, 150, this.alpha);
+      ellipse(this.pos.x, this.pos.y, 4);
     }
     finished() { return this.alpha < 0; }
   }
